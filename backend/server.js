@@ -155,9 +155,9 @@ app.post("/albums", (req,res)=>{
 	});
 });
 
-app.delete("albums/:id", (req, res)=>{
+app.post("albums/delete/:id", (req, res)=>{
     const album_id = req.params.id;
-    const q = `DELETE FROM \`album\` WHERE aid = ${req.params.id}`
+    const q = `DELETE FROM album WHERE aid = ${req.params.id}`
     connection.query(q, function(err, rows){
         if (err) return res.json(err)  
         return res.json(`Album ${req.params.id} deleted.`);
@@ -175,7 +175,7 @@ app.post("/albums", (req,res)=>{
 	  		throw err
 	  	}
         const values = [req.body.name, req.body.owner_id, req.body.datePosted];
-	    connection.query("INSERT INTO albums(`name`, `owner_id`, `datePosted`) VALUES (?);", [values], function(err, rows){
+	    connection.query("INSERT INTO album(`name`, `owner_id`, `datePosted`) VALUES (?);", [values], function(err, rows){
             if (err) return res.json(err) 
             return res.json("Album has been Posted.");
         })
@@ -336,6 +336,38 @@ app.get("/youMayAlsoLike", (req,res)=>{
 		connection.release()
 	})
 })
+
+app.get("/recommended_friends/:id", (req, res) => {
+	mysql_pool.getConnection(function (err, connection) {
+	  if (err) {
+		connection.release();
+		console.log("Error getting mysql_pool connection: " + err);
+		throw err;
+	  }
+  
+	  const q = `SELECT f2.friend_id AS recommended_friend, COUNT(*) AS mutual_friends_count
+				  FROM friend f1
+				  JOIN friend f2 ON f1.friend_id = f2.uid_friends
+				  WHERE f1.uid_friends = ${req.params.id}
+					AND f2.friend_id NOT IN (
+					  SELECT friend_id
+					  FROM friend
+					  WHERE uid_friends = ${req.params.id}
+					)
+					AND f2.friend_id != ${req.params.id}
+				  GROUP BY f2.friend_id
+				  ORDER BY mutual_friends_count DESC
+				  LIMIT 0,5;`;
+  
+	  connection.query(q, function (err, rows) {
+		if (err) return res.json(err);
+		return res.json(rows);
+	  });
+  
+	  connection.release();
+	});
+  });
+  
 
 app.listen(PORT, function(err){
     if (err) console.log("Error in server setup")
