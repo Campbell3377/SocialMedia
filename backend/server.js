@@ -1,8 +1,11 @@
 import express from "express"
 import mysql from "mysql"
+const { createHash } = await import('crypto');
 
 const app = express()
 var PORT = 5501
+
+
 
 const mysql_pool = mysql.createPool({
     connectionLimit: 100,
@@ -11,6 +14,10 @@ const mysql_pool = mysql.createPool({
     password:"Password23644.",
     database:"social"
 })
+
+function hash(string) {
+	return createHash('sha256').update(string).digest('hex');
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -37,7 +44,7 @@ app.get("/users", (req,res)=>{
 	})
 })
 
-
+//Create User
 app.post("/users", (req,res)=>{
     console.log("API CALL: /users -post")
 	var retvalSettingValue = "?"
@@ -57,6 +64,7 @@ app.post("/users", (req,res)=>{
 	});
 });
 
+//Update User
 app.post("/users/:id", (req,res)=>{
     mysql_pool.getConnection(function(err, connection) {
 		if (err) {
@@ -68,16 +76,114 @@ app.post("/users/:id", (req,res)=>{
 		const q = `UPDATE users SET \`firstName\` = ${req.body.firstName}, \`lastName\` = ${req.body.lastName}, \`hometown\` = ${req.body.hometown}, \`gender\` = ${req.body.gender}, \`password\` = ${req.body.password} WHERE uid = ${req.params.id};`;
         const user_id = req.params.id;
 		console.log(q);
-        const values = [req.body.firstName, req.body.lastName, req.body.hometown, req.body.gender, req.body.password];
+        //const values = [req.body.firstName, req.body.lastName, req.body.hometown, req.body.gender, req.body.password];
 	    connection.query(q, function(err, rows){
             if (err) return res.json(err)  
-            return res.json(ros);
+            return res.json(rows);
         })
 		console.log(" mysql_pool.release()")
 		connection.release()
 	});
 });
 
+//Login
+app.get("/login", (req,res)=>{
+    console.log("API CALL: /login -get")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		var email = req.body.email;
+		var password = hash(req.body.password);
+	    connection.query(`SELECT uid FROM users WHERE email LIKE \'${email}\' AND password LIKE \'${password}\'`,  function(err, rows){
+            if (err) return res.json(err)  
+            return res.json(rows);
+        })
+		console.log("mysql_pool.release()")
+		connection.release()
+	})
+})
+
+//Feed
+app.get("/feed/:uid", (req,res)=>{
+    console.log("API CALL: /photosByTag -get")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		const id = req.params.uid;
+		const q = `SELECT distinct p.pid, p.data, p.caption, p.datePosted, u.firstName, u.lastName, a.aid, a.name as albumName
+		FROM photos p
+		JOIN album a ON p.aid = a.aid
+		JOIN users u ON a.owner_id = u.uid
+		JOIN friend f ON f.friend_id = u.uid OR f.uid_friends = u.uid
+		WHERE (f.uid_friends = ${id} OR f.friend_id = ${id} OR u.uid = ${id})
+		ORDER BY p.datePosted DESC;`
+	    connection.query(q, function(err, rows){
+            if (err) return res.json(err)  
+            return res.json(rows);
+        })
+		console.log("mysql_pool.release()")
+		connection.release()
+	})
+})
+
+//albumPhotos
+app.get("/albumPhotos/:aid", (req,res)=>{
+    console.log("API CALL: /albumPhotos -get")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		const id = req.params.aid;
+		const q = `SELECT distinct p.pid, p.data, p.caption, p.datePosted, u.firstName, u.lastName, a.aid, a.name as albumName
+		FROM photos p
+		JOIN album a ON p.aid = a.aid
+		JOIN users u ON a.owner_id = u.uid
+		WHERE a.aid = ${id}
+		ORDER BY p.datePosted DESC;`
+	    connection.query(q, function(err, rows){
+            if (err) return res.json(err)  
+            return res.json(rows);
+        })
+		console.log("mysql_pool.release()")
+		connection.release()
+	})
+})
+
+//User Search
+app.get("/users/search", (req,res)=>{
+    mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		// const q = "UPDATE users SET `firstName` = ?, `lastName` = ?, `hometown` = ?, `gender` = ?, `password` = ? WHERE uid = ?";
+		let str = req.body.search;
+		const q = `SELECT uid, firstName, lastName, email 
+					FROM users 
+					WHERE firstName LIKE \'${str}\' OR lastName LIKE \'${str}\' OR email LIKE \'${str}\';`;
+        //const values = [req.body.firstName, req.body.lastName, req.body.hometown, req.body.gender, req.body.password];
+	    connection.query(q, function(err, rows){
+            if (err) return res.json(err)  
+            return res.json(rows);
+        })
+		console.log(" mysql_pool.release()")
+		connection.release()
+	});
+});
+
+//Add Friend
 app.post("/friends", (req,res)=>{
     console.log("API CALL: /friends -post")
 	var retvalSettingValue = "?"
@@ -97,7 +203,35 @@ app.post("/friends", (req,res)=>{
 	});
 });
 
-app.get("/contributionScore/:id", (req,res)=>{
+//List Friends
+app.get("/friends/list/:uid", (req,res)=>{
+    console.log(`API CALL: /friends/list/${req.params.id} -get`)
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		let id = req.params.uid;
+		const q = `SELECT u.uid, u.firstName, u.lastName, u.email, MAX(f.date_formed) AS date_formed, 
+						(CASE WHEN COUNT(CASE WHEN (f.uid_friends = ${id} AND f.friend_id = u.uid) THEN 1 END) > 0 THEN true ELSE false END) AS isFollowing
+					FROM friend f 
+					JOIN users u ON f.friend_id = u.uid OR f.uid_friends = u.uid 
+					WHERE (f.uid_friends = ${id} OR f.friend_id = ${id}) AND u.uid != ${id}
+					GROUP BY u.uid, u.firstName, u.lastName, u.email 
+					ORDER BY MAX(f.date_formed) DESC;`;
+	    connection.query(q, function(err, rows){
+            if (err) return res.json(err)  
+            return res.json(rows);
+        })
+		console.log(" mysql_pool.release()")
+		connection.release()
+	});
+});
+
+//Get Contribution Score for current user
+app.get("/contributionScore/uid", (req,res)=>{
     console.log("API CALL: /contributionScore -get")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function(err, connection) {
@@ -118,24 +252,7 @@ app.get("/contributionScore/:id", (req,res)=>{
 	})
 })
 
-app.get("/login", (req,res)=>{
-    console.log("API CALL: /login -get")
-	var retvalSettingValue = "?"
-	mysql_pool.getConnection(function(err, connection) {
-		if (err) {
-			connection.release()
-	  		console.log(" Error getting mysql_pool connection: " + err)
-	  		throw err
-	  	}
-		var email = req.body.email;
-	    connection.query(`SELECT password FROM users WHERE email LIKE ${email}`,  function(err, rows){
-            if (err) return res.json(err)  
-            return res.json(rows);
-        })
-		console.log("mysql_pool.release()")
-		connection.release()
-	})
-})
+//Create Album
 app.post("/albums", (req,res)=>{
     console.log("API CALL: /albums -post")
 	var retvalSettingValue = "?"
@@ -145,7 +262,7 @@ app.post("/albums", (req,res)=>{
 	  		console.log(" Error getting mysql_pool connection: " + err)
 	  		throw err
 	  	}
-        const q = `INSERT INTO album (\`name\`, \`owner_id\`, \`datePosted\`) VALUES (${req.body.name}, ${req.body.owner_id}, ${req.body.datePosted})`;
+        const q = `INSERT INTO album (\`name\`, \`owner_id\`, \`datePosted\`) VALUES (\'${req.body.name}\', ${req.body.owner_id}, \'${req.body.datePosted}\')`;
 	    connection.query(q, function(err, rows){
             if (err) return res.json(err) 
             return res.json("Album has been Posted.");
@@ -155,18 +272,9 @@ app.post("/albums", (req,res)=>{
 	});
 });
 
-app.post("albums/delete/:id", (req, res)=>{
-    const album_id = req.params.id;
-    const q = `DELETE FROM album WHERE aid = ${req.params.id}`
-    connection.query(q, function(err, rows){
-        if (err) return res.json(err)  
-        return res.json(`Album ${req.params.id} deleted.`);
-    })
-})
-
-
-app.post("/albums", (req,res)=>{
-    console.log("API CALL: /albums -post")
+//Update Album
+app.post("/albums/name", (req,res)=>{
+    console.log("API CALL: /albums/name -post")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function(err, connection) {
 		if (err) {
@@ -174,34 +282,78 @@ app.post("/albums", (req,res)=>{
 	  		console.log(" Error getting mysql_pool connection: " + err)
 	  		throw err
 	  	}
-        const values = [req.body.name, req.body.owner_id, req.body.datePosted];
-	    connection.query("INSERT INTO album(`name`, `owner_id`, `datePosted`) VALUES (?);", [values], function(err, rows){
+        const q = `UPDATE album SET name = \'${req.body.name}\' WHERE aid = ${req.body.aid}`;
+	    connection.query(q, function(err, rows){
             if (err) return res.json(err) 
-            return res.json("Album has been Posted.");
+            return res.json("Album has been updated.");
         })
 		console.log(" mysql_pool.release()")
 		connection.release()
 	});
 });
 
-app.delete("albums/:id", (req, res)=>{
-    const album_id = req.params.id;
-    const q = "DELETE FROM albums WHERE aid = ?"
-    connection.query(q, album_id, function(err, rows){
-        if (err) return res.json(err)  
-        return res.json("User has been created.");
-    })
+//Delete Album
+app.post("/deleteAlbum/:aid", (req, res)=>{
+	console.log("API CALL: /deleteAlbum/{id} -post")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		const album_id = req.params.aid;
+		const q = `DELETE FROM album WHERE aid = ${req.params.id}`
+		connection.query(q, function(err, rows){
+			if (err) return res.json(err)  
+			//return res.json(`Album ${req.params.id} deleted.`);
+			return res.json(rows);
+		})
+		console.log(" mysql_pool.release()")
+		connection.release()
+	});
+    
 })
 
-app.delete("albums/:pid", (req, res)=>{
-    const photo_id = req.params.pid;
-    const q = "DELETE FROM photos WHERE aid = ?"
-    connection.query(q, photo_id, function(err, rows){
-        if (err) return res.json(err)  
-        return res.json("User has been created.");
-    })
-})
+//Get next pid
+app.get("/nextpid", (req,res)=>{
+    console.log("API CALL: /nextpid -get")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+	    connection.query("SELECT MAX(pid)+1 as pid FROM photos", function(err, rows){
+            if (err) return res.json(err) 
+            return res.json(rows);
+        })
+		console.log(" mysql_pool.release()")
+		connection.release()
+	});
+});
 
+//Get latest pid
+app.get("/latestpid", (req,res)=>{
+    console.log("API CALL: /nextpid -get")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+	    connection.query("SELECT MAX(pid) as pid FROM photos", function(err, rows){
+            if (err) return res.json(err) 
+            return res.json(rows);
+        })
+		console.log(" mysql_pool.release()")
+		connection.release()
+	});
+});
+
+//Post Photo
 app.post("/photos", (req,res)=>{
     console.log("API CALL: /photos -post")
 	var retvalSettingValue = "?"
@@ -211,8 +363,9 @@ app.post("/photos", (req,res)=>{
 	  		console.log(" Error getting mysql_pool connection: " + err)
 	  		throw err
 	  	}
-        const values = [req.body.album_id, req.body.caption, req.body.data, req.body.datePosted];
-	    connection.query("INSERT INTO albums(`aid`, `caption`, `data`, `datePosted`) VALUES (?);", [values], function(err, rows){
+		const q = `INSERT INTO photos(\`aid\`, \`caption\`, \`data\`, \`datePosted\`) VALUES (${req.body.aid}, \'${req.body.caption}\', \'${req.body.data}\', \'${req.body.datePosted}\');`
+        //const values = [req.body.album_id, req.body.caption, req.body.data, req.body.datePosted];
+	    connection.query(q, function(err, rows){
             if (err) return res.json(err) 
             return res.json("Photo has been Posted.");
         })
@@ -221,8 +374,9 @@ app.post("/photos", (req,res)=>{
 	});
 });
 
-app.post("/comments", (req,res)=>{
-    console.log("API CALL: /comments -post")
+//Update Photo
+app.post("/photos/caption", (req,res)=>{
+    console.log("API CALL: /photos/caption -post")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function(err, connection) {
 		if (err) {
@@ -230,18 +384,20 @@ app.post("/comments", (req,res)=>{
 	  		console.log(" Error getting mysql_pool connection: " + err)
 	  		throw err
 	  	}
-		var values = [req.body.text, req.body.owner_id, req.body.date, req.body.pid];
-	    connection.query("INSERT INTO comments(`text`, `owner_id`, `datePosted`, `pid`) VALUES (?)", values, function(err, rows){
-            if (err) return res.json(err)  
-            return res.json("Comment Posted");
+		const q = `UPDATE photos SET caption = \'${req.body.caption}\' WHERE pid = ${req.body.pid};`
+        //const values = [req.body.album_id, req.body.caption, req.body.data, req.body.datePosted];
+	    connection.query(q, function(err, rows){
+            if (err) return res.json(err) 
+            return res.json("Caption Updated.");
         })
-		console.log("mysql_pool.release()")
+		console.log(" mysql_pool.release()")
 		connection.release()
-	})
-})
+	});
+});
 
-app.get("/commentSearch", (req,res)=>{
-    console.log("API CALL: /commentSearch -get")
+//Add Tag
+app.post("/tags", (req,res)=>{
+    console.log("API CALL: /tags -post")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function(err, connection) {
 		if (err) {
@@ -249,16 +405,40 @@ app.get("/commentSearch", (req,res)=>{
 	  		console.log(" Error getting mysql_pool connection: " + err)
 	  		throw err
 	  	}
-		var comment = req.body.comment;
-	    connection.query("SELECT * FROM Comments WHERE text LIKE ?", comment,  function(err, rows){
-            if (err) return res.json(err)  
+		const q = `INSERT INTO tags(\`tag_name\`, \`pid_tags\`) VALUES (\'${req.body.tagName}\', ${req.body.pid});`
+        //const values = [req.body.album_id, req.body.caption, req.body.data, req.body.datePosted];
+	    connection.query(q, function(err, rows){
+            if (err) return res.json(err) 
             return res.json(rows);
         })
-		console.log("mysql_pool.release()")
+		console.log(" mysql_pool.release()")
 		connection.release()
-	})
+	});
+});
+
+//Delete Photo
+app.post("/deletephoto/:id", (req, res)=>{
+	console.log("API CALL: /deletephoto/{id} -post")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		const album_id = req.params.id;
+		const q = `DELETE FROM photos WHERE pid = ${req.params.id}`
+		connection.query(q, function(err, rows){
+			if (err) return res.json(err)  
+			return res.json(`Photo ${req.params.id} deleted.`);
+		})
+		console.log(" mysql_pool.release()")
+		connection.release()
+	});
+    
 })
 
+//Like Photo
 app.post("/likes", (req,res)=>{
     console.log("API CALL: /likes -post")
 	var retvalSettingValue = "?"
@@ -268,17 +448,145 @@ app.post("/likes", (req,res)=>{
 	  		console.log(" Error getting mysql_pool connection: " + err)
 	  		throw err
 	  	}
-		var values = [req.body.owner_id, req.body.pid];
-	    connection.query("INSERT INTO likes(`owner_id_likes`, `pid`) VALUES (?)", values, function(err, rows){
+		const q = `INSERT INTO likes(\`owner_id_likes\`, \`pid\`) VALUES (${req.body.uid}, ${req.body.pid});`
+        //const values = [req.body.album_id, req.body.caption, req.body.data, req.body.datePosted];
+	    connection.query(q, function(err, rows){
+            if (err) return res.json(err) 
+            return res.json(rows);
+        })
+		console.log(" mysql_pool.release()")
+		connection.release()
+	});
+});
+
+//Count Likes
+app.get("/likes/:pid", (req,res)=>{
+    console.log("API CALL: /likes/{pid} -get")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		const q = `SELECT COUNT(*) as count FROM likes WHERE pid = ${req.params.pid};`;
+        //const values = [req.body.album_id, req.body.caption, req.body.data, req.body.datePosted];
+	    connection.query(q, function(err, rows){
+            if (err) return res.json(err) 
+            return res.json(rows);
+        })
+		console.log(" mysql_pool.release()")
+		connection.release()
+	});
+});
+
+//Add Comment
+app.post("/comments", (req,res)=>{
+    console.log("API CALL: /comments -post")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		const q = `INSERT INTO comment(\`text\`, \`owner_id\`, \`datePosted\`, \`pid\`) VALUES (\'${req.body.text}\', ${req.body.uid}, \'${req.body.date}\', ${req.body.pid})`
+		//var values = [req.body.text, req.body.owner_id, req.body.date, req.body.pid];
+	    connection.query(q, function(err, rows){
             if (err) return res.json(err)  
-            return res.json("Photo Liked");
+            return res.json("Comment Posted");
         })
 		console.log("mysql_pool.release()")
 		connection.release()
 	})
 })
 
-app.get("/photosByTag", (req,res)=>{
+//Get Comments By pid
+app.get("/comments/:pid", (req,res)=>{
+    console.log("API CALL: /comments -post")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		const q = `SELECT c.cid, c.owner_id, u.firstName, u.lastName, u.email, c.text as comment, c.datePosted
+						FROM comment c
+						JOIN users u ON c.owner_id = u.uid
+						WHERE c.pid = ${req.params.pid}
+						ORDER BY c.datePosted ASC;`
+		//var values = [req.body.text, req.body.owner_id, req.body.date, req.body.pid];
+	    connection.query(q, function(err, rows){
+            if (err) return res.json(err)  
+            return res.json("Comment Posted");
+        })
+		console.log("mysql_pool.release()")
+		connection.release()
+	})
+})
+
+//commentSearch
+app.get("/commentSearch", (req,res)=>{
+    console.log("API CALL: /commentSearch -get")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		const q = `SELECT u.*, COUNT(c.cid) AS matching_comments_count
+						FROM comment c
+						JOIN users u ON c.owner_id = u.uid
+						WHERE c.text = \'${req.body.search}\'
+						GROUP BY u.uid
+						ORDER BY matching_comments_count DESC;`
+		var comment = req.body.comment;
+	    connection.query(q,  function(err, rows){
+            if (err) return res.json(err)  
+            return res.json(rows);
+        })
+		console.log("mysql_pool.release()")
+		connection.release()
+	})
+})
+
+//Search By Tag
+app.get("/searchByTag", (req,res)=>{
+    console.log("API CALL: /searchByTag -get")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		var str = req.body.tags;
+		var values = str.split(',');
+		var tags = ``
+		values.forEach(tag => {
+			tags += `\'${tag}\',`
+		});
+		const inStr = tags.slice(0, -1)
+		console.log(inStr)
+		const q = `SELECT photos.*, COUNT(*) AS matching_tags, (SELECT COUNT(*) FROM tags WHERE pid_tags = photos.pid) AS total_tags
+						FROM photos
+						JOIN tags ON photos.pid = tags.pid_tags
+						WHERE tag_name IN (${inStr})
+						GROUP BY photos.pid
+						ORDER BY matching_tags DESC, total_tags ASC`
+	    connection.query(q, function(err, rows){
+            if (err) return res.json(err)  
+            return res.json(rows);
+        })
+		console.log("mysql_pool.release()")
+		connection.release()
+	})
+})
+
+//See all photos by Tag
+app.get("/photosByTag/:tag", (req,res)=>{
     console.log("API CALL: /photosByTag -get")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function(err, connection) {
@@ -287,17 +595,17 @@ app.get("/photosByTag", (req,res)=>{
 	  		console.log(" Error getting mysql_pool connection: " + err)
 	  		throw err
 	  	}
-		var values = req.body.tag;
-	    connection.query("SELECT * FROM photos WHERE EXISTS (SELECT pid FROM tags WHERE tag LIKE ?)", values, function(err, rows){
+	    connection.query(`SELECT * FROM photos WHERE EXISTS (SELECT pid FROM tags WHERE tag_name LIKE \'${req.params.tag}\')`, function(err, rows){
             if (err) return res.json(err)  
-            return res.json("Photo Liked");
+            return res.json(rows);
         })
 		console.log("mysql_pool.release()")
 		connection.release()
 	})
 })
 
-app.get("/yourPhotosByTag", (req,res)=>{
+//See your photos by Tag
+app.get("/yourPhotosByTag/:uid/:tag", (req,res)=>{
     console.log("API CALL: /yourPhotosByTag -get")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function(err, connection) {
@@ -306,9 +614,17 @@ app.get("/yourPhotosByTag", (req,res)=>{
 	  		console.log(" Error getting mysql_pool connection: " + err)
 	  		throw err
 	  	}
-		const q = "SELECT * FROM social.photos as p WHERE EXISTS (SELECT * FROM social.album as a WHERE p.aid = a.aid AND a.owner_id= ?) AND EXISTS (SELECT pid_tags FROM social.tags as t WHERE t.tag_name LIKE `?`)";
-		var values = [req.body.tag, req.body.uid]
-	    connection.query(q, [values], function(err, rows){
+		const q = `SELECT * FROM social.photos as p
+		WHERE EXISTS (SELECT *
+						FROM social.album as a
+						WHERE p.aid = a.aid
+						AND a.owner_id=${req.params.uid})
+		AND EXISTS (SELECT pid_tags
+						FROM social.tags as t
+						WHERE t.tag_name LIKE \'${req.params.tag}\'
+						AND t.pid_tags = pid) `
+		//var values = [req.body.tag, req.body.uid]
+	    connection.query(q, function(err, rows){
             if (err) return res.json(err)  
             return res.json(rows);
         })
@@ -317,7 +633,33 @@ app.get("/yourPhotosByTag", (req,res)=>{
 	})
 })
 
-app.get("/youMayAlsoLike", (req,res)=>{
+//See trending Tags
+app.get("/trendingTags", (req,res)=>{
+    console.log("API CALL: /trendingTags -get")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function(err, connection) {
+		if (err) {
+			connection.release()
+	  		console.log(" Error getting mysql_pool connection: " + err)
+	  		throw err
+	  	}
+		const q = `SELECT tag_name, COUNT(tag_name)
+		FROM tags
+		GROUP BY tag_name
+		ORDER BY COUNT(tag_name) DESC
+		LIMIT 0,5`
+		//var values = [req.body.tag, req.body.uid]
+	    connection.query(q, function(err, rows){
+            if (err) return res.json(err)  
+            return res.json(rows);
+        })
+		console.log("mysql_pool.release()")
+		connection.release()
+	})
+})
+
+//You May Also Like
+app.get("/youMayAlsoLike/:id", (req,res)=>{
     console.log("API CALL: /youMayAlsoLike -get")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function(err, connection) {
@@ -326,9 +668,37 @@ app.get("/youMayAlsoLike", (req,res)=>{
 	  		console.log(" Error getting mysql_pool connection: " + err)
 	  		throw err
 	  	}
-		const q = "SELECT DISTINCT photos.* FROM photos JOIN tags ON photos.pid = tags.pid_tags LEFT JOIN album ON photos.aid = album.aid AND album.owner_id = ? JOIN ( SELECT tags.tag_name, COUNT(*) AS count FROM photos JOIN tags ON photos.pid = tags.pid_tags WHERE photos.aid IN ( SELECT aid FROM album WHERE album.owner_id = ?) GROUP BY tags.tag_name ORDER BY count DESC LIMIT 5) AS top_tags ON tags.tag_name = top_tags.tag_name WHERE album.aid IS NULL AND photos.pid NOT IN (SELECT photos.pid FROM photos JOIN tags ON photos.pid = tags.pid_tags WHERE tags.tag_name = top_tags.tag_name AND photos.aid IN (SELECT aid FROM album WHERE album.owner_id = ?))ORDER BY RAND() LIMIT 0,10;";
+		const id = req.params.id;
+		const q = `SELECT DISTINCT photos.*
+		FROM photos
+		JOIN tags ON photos.pid = tags.pid_tags
+		LEFT JOIN album ON photos.aid = album.aid AND album.owner_id = ${id}
+		JOIN (
+			SELECT tags.tag_name, COUNT(*) AS count
+			FROM photos
+			JOIN tags ON photos.pid = tags.pid_tags
+			WHERE photos.aid IN (
+				SELECT aid
+				FROM album
+				WHERE album.owner_id = ${id}
+			)
+			GROUP BY tags.tag_name
+			ORDER BY count DESC
+			LIMIT 5
+		) AS top_tags ON tags.tag_name = top_tags.tag_name
+		WHERE album.aid IS NULL AND photos.pid NOT IN (
+			SELECT photos.pid
+			FROM photos
+			JOIN tags ON photos.pid = tags.pid_tags
+			WHERE tags.tag_name = top_tags.tag_name AND photos.aid IN (
+				SELECT aid
+				FROM album
+				WHERE album.owner_id = ${id}
+			)
+		)
+		LIMIT 0,10;`
 		var owner = req.body.owner_id;
-	    connection.query("SELECT COUNT(P.pid) + COUNT(C.cid) FROM Photos AS P JOIN Comments AS C ON  WHERE P.uid = ?", owner,  function(err, rows){
+	    connection.query(q,  function(err, rows){
             if (err) return res.json(err)  
             return res.json(rows);
         })
@@ -337,7 +707,8 @@ app.get("/youMayAlsoLike", (req,res)=>{
 	})
 })
 
-app.get("/recommended_friends/:id", (req, res) => {
+//Recommended Friends (Mutual Friends)
+app.get("/recommendedFriends/:id", (req, res) => {
 	mysql_pool.getConnection(function (err, connection) {
 	  if (err) {
 		connection.release();
