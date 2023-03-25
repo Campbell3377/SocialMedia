@@ -111,7 +111,7 @@ app.post("/login", (req, res) => {
 
 //Feed
 app.get("/feed/:uid", (req, res) => {
-	console.log("API CALL: /photosByTag -get")
+	console.log("API CALL: /feed -get")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function (err, connection) {
 		if (err) {
@@ -463,7 +463,7 @@ app.post("/likes", (req, res) => {
 
 //Count Likes
 app.get("/likes/:pid", (req, res) => {
-	console.log("API CALL: /likes/{pid} -get")
+	console.log(`API CALL: /likes/${req.params.pid} -get`)
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function (err, connection) {
 		if (err) {
@@ -474,7 +474,7 @@ app.get("/likes/:pid", (req, res) => {
 		const q = `SELECT COUNT(*) as count FROM likes WHERE pid = ${req.params.pid};`;
 		//const values = [req.body.album_id, req.body.caption, req.body.data, req.body.datePosted];
 		connection.query(q, function (err, rows) {
-			if (err) return res.json(err)
+			if (err) {console.log(err);return res.json(err)}
 			return res.json(rows);
 		})
 		console.log(" mysql_pool.release()")
@@ -505,7 +505,7 @@ app.post("/comments", (req, res) => {
 
 //Get Comments By pid
 app.get("/comments/:pid", (req, res) => {
-	console.log("API CALL: /comments -post")
+	console.log(`API CALL: /comments/${req.params.pid} -get`)
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function (err, connection) {
 		if (err) {
@@ -520,8 +520,31 @@ app.get("/comments/:pid", (req, res) => {
 						ORDER BY c.datePosted ASC;`
 		//var values = [req.body.text, req.body.owner_id, req.body.date, req.body.pid];
 		connection.query(q, function (err, rows) {
-			if (err) return res.json(err)
-			return res.json("Comment Posted");
+			if (err) {console.log(err);return res.json(err)}
+			return res.json(rows);
+		})
+		console.log("mysql_pool.release()")
+		connection.release()
+	})
+})
+
+//Get Tags By pid
+app.get("/tags/:pid", (req, res) => {
+	console.log(`API CALL: /tags/${req.params.pid} -get`)
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function (err, connection) {
+		if (err) {
+			connection.release()
+			console.log(" Error getting mysql_pool connection: " + err)
+			throw err
+		}
+		const q = `SELECT tag_name
+						FROM tags
+						WHERE pid_tags = ${req.params.pid}`;
+		//var values = [req.body.text, req.body.owner_id, req.body.date, req.body.pid];
+		connection.query(q, function (err, rows) {
+			if (err) {console.log(err);return res.json(err)}
+			return res.json(rows);
 		})
 		console.log("mysql_pool.release()")
 		connection.release()
