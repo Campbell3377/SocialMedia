@@ -233,7 +233,7 @@ app.get("/friends/list/:uid", (req, res) => {
 });
 
 //Get Contribution Score for current user
-app.get("/contributionScore/uid", (req, res) => {
+app.get("/contributionScore", (req, res) => {
 	console.log("API CALL: /contributionScore -get")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function (err, connection) {
@@ -242,8 +242,20 @@ app.get("/contributionScore/uid", (req, res) => {
 			console.log(" Error getting mysql_pool connection: " + err)
 			throw err
 		}
-		var owner = req.params.id;
-		const q = `SELECT pscore + cscore FROM (SELECT COUNT(p.pid) as pscore FROM photos as p WHERE EXISTS (SELECT p.pid FROM album WHERE album.aid = p.aid AND album.owner_id = ${owner})) as p, (SELECT COUNT(cid) as cscore FROM comment as c WHERE c.owner_id = ${owner}) as c`;
+		const q = `SELECT u.uid, u.firstName, u.lastName, u.email, (COALESCE(p.pscore, 0) + COALESCE(c.cscore, 0)) as score, p.pscore, c.cscore
+		FROM users u
+		LEFT JOIN
+		  (SELECT album.owner_id, COUNT(p.pid) as pscore
+		   FROM photos as p
+		   INNER JOIN album ON p.aid = album.aid
+		   GROUP BY album.owner_id) as p
+		ON u.uid = p.owner_id
+		LEFT JOIN
+		  (SELECT c.owner_id, COUNT(cid) as cscore
+		   FROM comment as c
+		   GROUP BY c.owner_id) as c
+		ON u.uid = c.owner_id
+		ORDER BY score DESC;`
 
 		connection.query(q, function (err, rows) {
 			if (err) return res.json(err)
