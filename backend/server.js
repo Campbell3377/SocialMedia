@@ -590,7 +590,7 @@ app.get("/commentSearch", (req, res) => {
 })
 
 //Search By Tag
-app.get("/searchByTag", (req, res) => {
+app.get("/searchByTag/:tags", (req, res) => {
 	console.log("API CALL: /searchByTag -get")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function (err, connection) {
@@ -599,7 +599,7 @@ app.get("/searchByTag", (req, res) => {
 			console.log(" Error getting mysql_pool connection: " + err)
 			throw err
 		}
-		var str = req.body.tags;
+		var str = req.params.tags;
 		var values = str.split(',');
 		var tags = ``
 		values.forEach(tag => {
@@ -632,7 +632,7 @@ app.get("/photosByTag/:tag", (req, res) => {
 			console.log(" Error getting mysql_pool connection: " + err)
 			throw err
 		}
-		connection.query(`SELECT * FROM photos WHERE EXISTS (SELECT pid FROM tags WHERE tag_name LIKE \'${req.params.tag}\')`, function (err, rows) {
+		connection.query(`SELECT * FROM photos WHERE EXISTS (SELECT * FROM tags WHERE tag_name LIKE \'${req.params.tag}\' AND pid = pid_tags)`, function (err, rows) {
 			if (err) return res.json(err)
 			return res.json(rows);
 		})
@@ -642,7 +642,7 @@ app.get("/photosByTag/:tag", (req, res) => {
 })
 
 //See your photos by Tag
-app.get("/yourPhotosByTag/:uid/:tag", (req, res) => {
+app.get("/yourPhotosByTag/:tag/:uid", (req, res) => {
 	console.log("API CALL: /yourPhotosByTag -get")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function (err, connection) {
