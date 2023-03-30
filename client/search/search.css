@@ -1,0 +1,87 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f3f5;
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    /* added margin-bottom */
+}
+
+.search-input {
+    border: none;
+    padding: 5px;
+    margin-right: 10px;
+    width: 200px;
+}
+
+.search-button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    background-color: #3e8e41;
+}
+
+.search-select {
+    margin-left: 10px;
+}
+
+.search-return {
+    display: flex;
+    justify-content: center;
+    /* margin-top: 50px; */
+    /* removed margin-top */
+    margin-bottom: 20px;
+    /* added margin-bottom */
+}
+
+.result-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.avatar {
+    border-radius: 50%;
+    margin-right: 20px;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+}
+
+.name {
+    margin: 0;
+    font-size: 24px;
+}
+
+.email {
+    margin: 0;
+    color: #777;
+}
