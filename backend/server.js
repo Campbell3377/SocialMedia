@@ -163,19 +163,18 @@ app.get("/albumPhotos/:aid", (req, res) => {
 })
 
 //User Search
-app.get("/users/search", (req, res) => {
+app.post("/usersSearch", (req, res) => {
+	console.log("API CALL: /users/search -post")
 	mysql_pool.getConnection(function (err, connection) {
 		if (err) {
 			connection.release()
 			console.log(" Error getting mysql_pool connection: " + err)
 			throw err
 		}
-		// const q = "UPDATE users SET `firstName` = ?, `lastName` = ?, `hometown` = ?, `gender` = ?, `password` = ? WHERE uid = ?";
 		let str = req.body.search;
 		const q = `SELECT uid, firstName, lastName, email 
 					FROM users 
 					WHERE firstName LIKE \'${str}\' OR lastName LIKE \'${str}\' OR email LIKE \'${str}\';`;
-		//const values = [req.body.firstName, req.body.lastName, req.body.hometown, req.body.gender, req.body.password];
 		connection.query(q, function (err, rows) {
 			if (err) return res.json(err)
 			return res.json(rows);
