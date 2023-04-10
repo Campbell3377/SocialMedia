@@ -54,6 +54,8 @@ body {
     /* removed margin-top */
     margin-bottom: 20px;
     /* added margin-bottom */
+    flex-direction: column;
+    gap: 10px;
 }
 
 .result-card {
