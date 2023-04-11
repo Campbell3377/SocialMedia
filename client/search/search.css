@@ -52,9 +52,15 @@ body {
     border: none;
 }
 
-.search-return {
+.search-return-container {
     display: flex;
     justify-content: center;
+}
+
+.search-return {
+    width: 600px;
+    display: flex;
+    justify-content: space-evenly;
     margin-bottom: 20px;
     flex-direction: column;
     gap: 10px;
@@ -68,6 +74,7 @@ body {
     border-radius: 5px;
     padding: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    gap: 15px;
 }
 
 .avatar {

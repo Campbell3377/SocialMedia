@@ -485,7 +485,7 @@ app.get("/likes/:pid", (req, res) => {
 		const q = `SELECT COUNT(*) as count FROM likes WHERE pid = ${req.params.pid};`;
 		//const values = [req.body.album_id, req.body.caption, req.body.data, req.body.datePosted];
 		connection.query(q, function (err, rows) {
-			if (err) {console.log(err);return res.json(err)}
+			if (err) { console.log(err); return res.json(err) }
 			return res.json(rows);
 		})
 		console.log(" mysql_pool.release()")
@@ -531,7 +531,7 @@ app.get("/comments/:pid", (req, res) => {
 						ORDER BY c.datePosted ASC;`
 		//var values = [req.body.text, req.body.owner_id, req.body.date, req.body.pid];
 		connection.query(q, function (err, rows) {
-			if (err) {console.log(err);return res.json(err)}
+			if (err) { console.log(err); return res.json(err) }
 			return res.json(rows);
 		})
 		console.log("mysql_pool.release()")
@@ -554,7 +554,7 @@ app.get("/tags/:pid", (req, res) => {
 						WHERE pid_tags = ${req.params.pid}`;
 		//var values = [req.body.text, req.body.owner_id, req.body.date, req.body.pid];
 		connection.query(q, function (err, rows) {
-			if (err) {console.log(err);return res.json(err)}
+			if (err) { console.log(err); return res.json(err) }
 			return res.json(rows);
 		})
 		console.log("mysql_pool.release()")
@@ -563,8 +563,8 @@ app.get("/tags/:pid", (req, res) => {
 })
 
 //commentSearch
-app.get("/commentSearch", (req, res) => {
-	console.log("API CALL: /commentSearch -get")
+app.post("/commentSearch", (req, res) => {
+	console.log("API CALL: /commentSearch -post")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function (err, connection) {
 		if (err) {
