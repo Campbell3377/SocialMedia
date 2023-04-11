@@ -10,6 +10,14 @@
 </head>
 
 <body>
+    <nav class="navbar">
+        <a href="../home/home.html" class="nav-item">Home</a>
+        <a href="./search.html" class="nav-item">Search</a>
+        <a href="../leaderboard/leaderboard.html" class="nav-item">Leaderboard</a>
+        <a href="../trending/trending.html" class="nav-item">Trending</a>
+        <a href="../profile/profile.html" class="nav-item">Profile</a>
+        <button type="submit" class="logout-btn" onclick="logout()">Logout</button>
+    </nav>
     <div class="search-container">
         <div class="search-bar">
             <input type="text" class="search-input" placeholder="Search...">
@@ -21,12 +29,15 @@
             <button class="search-button">Search</button>
         </div>
     </div>
-    <div class="search-return">
-        <div class="result-card">
-            <h3 class="name">John Doe</h3>
-            <p class="email">john.doe@example.com</p>
+    <div class="search-return-container">
+        <div class="search-return">
+            <!-- <div class="result-card">
+                <h3 class="name">John Doe</h3>
+                <p class="email">john.doe@example.com</p>
+            </div> -->
         </div>
     </div>
+
     <script src="./search.js"></script>
 </body>
 

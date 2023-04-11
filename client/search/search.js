@@ -53,13 +53,61 @@ searchButton.addEventListener('click', async () => {
                 alert('Error finding users. Please try again later.')
             }
         } catch (error) {
-
             console.error('Error while sending login request:', error)
             alert('An error occurred. Please try again.')
         }
     }
     else if (searchDropdownInput == 'comments') {
-        apiEndopoint = 'http://localhost:5501/commentSearch'
+        try {
+            const response = await fetch('http://localhost:5501/commentSearch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ search })
+            });
+
+            if (response.status === 200) {
+                // console.log('Hellos')
+                const data = await response.json()
+                searchReturn.innerHTML = ''
+
+                data.forEach(result => {
+                    const resultCardDiv = document.createElement('div')
+                    resultCardDiv.classList.add('result-card')
+
+                    const nameH3 = document.createElement('h3')
+                    nameH3.classList.add('name')
+                    nameH3.textContent = result.firstName + ' ' + result.lastName
+
+                    const emailP = document.createElement('p')
+                    emailP.classList.add('email')
+                    emailP.textContent = result.email
+
+
+                    const commentCount = document.createElement('p')
+                    commentCount.classList.add('commentCount')
+                    commentCount.textContent = `Matching Comments #: ${result.matching_comments_count}`
+                    resultCardDiv.appendChild(commentCount)
+
+                    resultCardDiv.appendChild(nameH3)
+                    resultCardDiv.appendChild(emailP)
+                    resultCardDiv.appendChild(commentCount)
+
+                    searchReturn.appendChild(resultCardDiv)
+                })
+            }
+            else {
+
+                const error = await response.text();
+                console.error('Error finding comments:', error);
+                alert('Error finding comments. Please try again later.')
+            }
+
+        } catch (error) {
+            console.error('An error occured:', error)
+            alert('Error while searching for comments. Please Try again later')
+        }
     }
     else if (searchDropdownInput == 'tags') {
         apiEndopoint = 'http://localhost:5501/searchByTag'
