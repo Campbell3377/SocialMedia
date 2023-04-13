@@ -1,6 +1,6 @@
-let colors = [
-    '#FFACAC', '#FFBFA9', '#F7C8E0', '#B4E4FF', '#DFFFD8',
-]
+// let colors = [
+//     '#FFACAC', '#FFBFA9', '#F7C8E0', '#B4E4FF', '#DFFFD8',
+// ]
 
 localStorage.setItem('see', 'see-all');
 
@@ -24,7 +24,7 @@ function populateTrendingTags(tags) {
     tags.forEach(tag => {
         let tagElement = document.createElement('a');
         tagElement.classList.add('tag');
-        tagElement.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        // tagElement.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
         tagElement.innerText = tag.tag_name;
         tagElement.onclick = () => {
             localStorage.setItem('tag', tag.tag_name);
@@ -35,8 +35,8 @@ function populateTrendingTags(tags) {
     });
 }
 
-function fetchTrendingTags() {
-    fetch('http://localhost:5501/trendingTags')
+async function fetchTrendingTags() {
+    await fetch('http://localhost:5501/trendingTags')
       .then(response => response.json())
       .then(data => {
         localStorage.setItem('mostTrending', data[0].tag_name);
@@ -99,11 +99,50 @@ async function getTaggedPhotos() {
             image.alt = post.caption;
             imageContainer.appendChild(image);
             postContainer.appendChild(imageContainer);
+
+            const caption = document.createElement('p');
+            caption.textContent = post.caption;
+            postContainer.appendChild(caption);
+
+            const tagsUrl = `http://localhost:5501/tags/${pid}`;
+            await fetch(tagsUrl, {
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+            })
+                .then((response) => {
+                if (response.status === 200) {
+                    return response.json();
+                } else {
+                    throw new Error('Bad Response: Tags');
+                }
+                })
+                .then((tagData) => {
+                if (tagData.length == 0) {
+                    console.log('No Tags.');
+                } else {
+                    const tagContainer = document.createElement('div');
+                    tagContainer.classList.add('tag-container');
+                    tagData.forEach((tag) => {
+                    const t = document.createElement('div');
+                    t.classList.add('tag');
+                    // t.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    t.textContent = tag.tag_name;
+                    tagContainer.appendChild(t);
+                    postContainer.appendChild(tagContainer);
+                    });
+                }
+                })
+                .catch((error) => {
+                console.error(error);
+                //alert('An error occurred. Please try again.');
+                });  
     
             const likesUrl = `http://localhost:5501/likes/${pid}`;
             console.log(likesUrl);
     
-            fetch(likesUrl, {
+            await fetch(likesUrl, {
                 method: 'GET',
                 headers: {
                 'Content-Type': 'application/json',
@@ -131,47 +170,13 @@ async function getTaggedPhotos() {
                 //alert('An error occurred. Please try again.');
                 });
 
-            const tagsUrl = `http://localhost:5501/tags/${pid}`;
-            fetch(tagsUrl, {
-                method: 'GET',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-            })
-                .then((response) => {
-                if (response.status === 200) {
-                    return response.json();
-                } else {
-                    throw new Error('Bad Response: Tags');
-                }
-                })
-                .then((tagData) => {
-                if (tagData.length == 0) {
-                    console.log('No Tags.');
-                } else {
-                    const tagContainer = document.createElement('div');
-                    tagContainer.classList.add('tag-container');
-                    tagData.forEach((tag) => {
-                    const t = document.createElement('div');
-                    t.classList.add('tag');
-                    t.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    t.textContent = tag.tag_name;
-                    tagContainer.appendChild(t);
-                    postContainer.appendChild(tagContainer);
-                    });
-                }
-                })
-                .catch((error) => {
-                console.error(error);
-                //alert('An error occurred. Please try again.');
-                });  
-
-            const caption = document.createElement('p');
-            caption.textContent = post.caption;
-            postContainer.appendChild(caption);
+            
+                const separation = document.createElement('div')
+                separation.classList.add('separation')
+                postContainer.appendChild(separation)
 
             const commentsUrl = `http://localhost:5501/comments/${pid}`;
-            fetch(commentsUrl, {
+            await fetch(commentsUrl, {
                 method: 'GET',
                 headers: {
                 'Content-Type': 'application/json',
