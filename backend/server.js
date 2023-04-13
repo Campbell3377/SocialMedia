@@ -588,8 +588,8 @@ app.post("/commentSearch", (req, res) => {
 	})
 })
 
-//Search By Tag
-app.get("/searchByTag/:tags", (req, res) => {
+//Search All Photos By Tag, Conjunctive
+app.get("/searchAllByTag/:tags", (req, res) => {
 	console.log("API CALL: /searchByTag -get")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function (err, connection) {
@@ -599,7 +599,7 @@ app.get("/searchByTag/:tags", (req, res) => {
 			throw err
 		}
 		var str = req.params.tags;
-		var values = str.split(',');
+		var values = str.split(' ');
 		var tags = ``
 		values.forEach(tag => {
 			tags += `\'${tag}\',`
@@ -660,6 +660,41 @@ app.get("/yourPhotosByTag/:tag/:uid", (req, res) => {
 						WHERE t.tag_name LIKE \'${req.params.tag}\'
 						AND t.pid_tags = pid) `
 		//var values = [req.body.tag, req.body.uid]
+		connection.query(q, function (err, rows) {
+			if (err) return res.json(err)
+			return res.json(rows);
+		})
+		console.log("mysql_pool.release()")
+		connection.release()
+	})
+})
+
+//Conjunctive Search of Your Photos
+app.get("/searchYoursByTag/:tags/:uid", (req, res) => {
+	console.log("API CALL: /searchByTag -get")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function (err, connection) {
+		if (err) {
+			connection.release()
+			console.log(" Error getting mysql_pool connection: " + err)
+			throw err
+		}
+		var str = req.params.tags;
+		var uid = req.params.uid;
+		var values = str.split(' ');
+		var tags = ``
+		values.forEach(tag => {
+			tags += `\'${tag}\',`
+		});
+		const inStr = tags.slice(0, -1)
+		console.log(inStr)
+		const q = `SELECT p.*, COUNT(*) AS matching_tags, (SELECT COUNT(*) FROM social.tags WHERE pid_tags = p.pid) AS total_tags
+                        FROM social.photos as p
+                        JOIN social.tags as t ON p.pid = t.pid_tags
+                        JOIN social.album as a ON p.aid = a.aid
+                        WHERE t.tag_name IN (${inStr}) AND a.owner_id = ${uid}
+                        GROUP BY p.pid
+                        ORDER BY matching_tags DESC, total_tags ASC`
 		connection.query(q, function (err, rows) {
 			if (err) return res.json(err)
 			return res.json(rows);
