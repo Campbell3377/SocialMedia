@@ -5,7 +5,11 @@
 }
 
 body {
-    background-color: #e5d1b9;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
@@ -16,8 +20,8 @@ body {
 }
 
 .card {
-    background-color: #fff;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    background-color: #282828;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 30px;
     border-radius: 5px;
     width: 400px;
@@ -27,8 +31,8 @@ h1 {
     font-size: 36px;
     font-weight: bold;
     margin-bottom: 30px;
-    color: #b89b6f;
-    text-shadow: 2px 2px #fff;
+    color: #e0e0e0;
+
 }
 
 .form-group {
@@ -40,7 +44,7 @@ label {
     font-weight: bold;
     display: block;
     margin-bottom: 10px;
-    color: #8d6e5c;
+    color: #e0e0e0;
 }
 
 .form-control {
@@ -49,11 +53,11 @@ label {
     border: none;
     border-radius: 5px;
     font-size: 16px;
-    background-color: #f4e9db;
+    background-color: #e0e0e0;
 }
 
 .btn {
-    background-color: #b89b6f;
+    background-color: #ff4b5c;
     color: #fff;
     font-size: 18px;
     font-weight: bold;
@@ -65,7 +69,7 @@ label {
 }
 
 .btn:hover {
-    background-color: #8d6e5c;
+    background-color: #e62739;
 }
 
 .signup {
@@ -74,6 +78,6 @@ label {
 }
 
 .signup a {
-    color: #b89b6f;
+    color: #ff4b5c;
     font-weight: bold;
 }

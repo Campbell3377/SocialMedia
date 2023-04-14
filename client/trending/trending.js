@@ -228,6 +228,10 @@ async function getTaggedPhotos() {
     
 }
 
+function logout() {
+    localStorage.clear()
+    window.location.href = '../login/login.html'
+  }
 // async function getTrendingPhotos(data) {
 //     document.getElementById('post-container').innerHTML = ''
 //     var uid = localStorage.getItem('uid');

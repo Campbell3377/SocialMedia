@@ -457,3 +457,8 @@ searchButton.addEventListener('click', async () => {
         return
     }
 })
+
+function logout() {
+    localStorage.clear()
+    window.location.href = '../login/login.html'
+}

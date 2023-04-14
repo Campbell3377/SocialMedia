@@ -6,10 +6,30 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alubmatic | Profile</title>
+    <link rel="stylesheet" href="./profile.css">
 </head>
 
 <body>
-    <h1>This is the profile page!</h1>
+    <nav class="navbar">
+        <a href="../home/home.html" class="nav-item">Home</a>
+        <a href="../search/search.html" class="nav-item">Search</a>
+        <a href="../leaderboard/leaderboard.html" class="nav-item">Leaderboard</a>
+        <a href="../trending/trending.html" class="nav-item">Trending</a>
+        <a href="./profile.html" class="nav-item">Profile</a>
+        <button type="submit" class="logout-btn" onclick="logout()">Logout</button>
+    </nav>
+
+    <h2>My Albums</h2>
+    <button>Create Album</button>
+    <button>Update Album</button>
+    <button>Delete Album</button>
+    <button>Post Photo</button>
+    <button>Delete Photo</button>
+
+    <h2>Friend Recommendations</h2>
+    <h2>You may also like</h2>
+
+    <script src="./profile.js"></script>
 </body>
 
 </html>
