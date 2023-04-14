@@ -243,3 +243,8 @@ async function likePhoto(pid) {
         throw error;
     }
 }
+
+function logout() {
+    localStorage.clear()
+    window.location.href = '../login/login.html'
+}

@@ -21,7 +21,7 @@ function populateLeaderboardTable(data) {
     scoreTd.textContent = row.score * 100;
     if (row.pscore == null) postsTd.textContent = 0;
     else postsTd.textContent = row.pscore;
-    if (row.cscore == null) commentsTd.textContent = 0 
+    if (row.cscore == null) commentsTd.textContent = 0
     else commentsTd.textContent = row.cscore;
 
     if (row.uid === current_uid) {
@@ -47,6 +47,11 @@ function fetchLeaderboardData() {
     .catch(error => {
       console.error('Error fetching leaderboard data:', error);
     });
+}
+
+function logout() {
+  localStorage.clear()
+  window.location.href = '../login/login.html'
 }
 
 fetchLeaderboardData();
