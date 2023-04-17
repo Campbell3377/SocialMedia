@@ -138,8 +138,22 @@ async function homeFeed() {
                 commentButton.textContent = 'Comment';
                 buttonContainer.appendChild(commentButton);
 
-                commentButton.addEventListener('click', () => {
+                commentButton.addEventListener('click', async () => {
+                    const text = prompt('Please enter your comment here:')
+                    try {
+                        if (text == '') {
+                            alert('Please enter a comment before submitting')
+                        }
+                        else {
+                            text.trim()
+                            await commentPhoto(pid, text)
 
+                            homeFeed()
+                        }
+
+                    } catch (error) {
+                        console.error('Error:', error)
+                    }
                 })
 
                 const separation = document.createElement('div')
@@ -241,6 +255,40 @@ async function likePhoto(pid) {
     } catch (error) {
         console.error('Error in likePhoto function', error);
         throw error;
+    }
+}
+
+async function commentPhoto(pid, text) {
+    const uid = localStorage.getItem('uid')
+    const datePosted = new Date().toISOString().slice(0, 10)
+
+    try {
+        const response = await fetch('http://localhost:5501/comments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: text,
+                uid: uid,
+                date: datePosted,
+                pid: pid,
+            }),
+        })
+
+        if (response.ok) {
+            const data = await response.json()
+            console.log('The posted comment: ', data)
+            return data
+        }
+        else {
+            console.error('There was an error adding comment')
+            throw new Error('There was an error adding comment')
+        }
+
+    } catch (error) {
+        console.error('Error in commentPhoto', error)
+        throw error
     }
 }
 
