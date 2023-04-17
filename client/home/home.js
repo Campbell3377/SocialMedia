@@ -1,7 +1,7 @@
 async function homeFeed() {
     document.getElementById('post-container').innerHTML = ''
     var uid = localStorage.getItem('uid');
-    if (uid != 1) uid = 2;
+    // if (uid != 1) uid = 2;
     let url = `http://localhost:5501/feed/${uid}`;
     try {
         const response = await fetch(url, {

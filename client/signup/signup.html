@@ -6,7 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./signup.css">
-    <script src="signup.js"></script>
     <title>Albumatic | Sign up</title>
 </head>
 
@@ -15,7 +14,7 @@
     <div class="container">
         <div class="card">
             <h1>Sign up</h1>
-            <form>
+            <form id="signup-form">
                 <div class="form-group2">
                     <div class="form-group">
                         <label for="firstName">First Name</label>
@@ -29,7 +28,7 @@
                 <div class="form-group2">
                     <div class="form-group">
                         <label for="dob">Date of Birth</label>
-                        <input type="text" class="form-control" id="dob" placeholder="Date of Birth" />
+                        <input type="text" class="form-control" id="dob" placeholder="YYYY-MM-DD" />
                     </div>
                     <div class="form-group">
                         <label for="hometown">Hometown</label>
@@ -38,10 +37,10 @@
                     <div class="form-group">
                         <label for="gender">Gender</label>
                         <!-- <input type="text" class="form-control" id="gender" placeholder="Gender" /> -->
-                        <select>
+                        <select id="gender">
                             <option></option>
-                            <option>M</option>
-                            <option>F</option>
+                            <option>Male</option>
+                            <option>Female</option>
                             <option>Other</option>
                         </select>
                     </div>
@@ -58,14 +57,14 @@
                     <label for="confirmPassword">Confirm Password</label>
                     <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" />
                 </div>
-                <button type="submit" class="btn">Login</button>
+                <button type="submit" class="btn">Sign Up</button>
             </form>
             <div class="signup">
-                <p>Go to <a href="../login/login.html">Login</a></p>
+                <p>Already have an account? <a href="../login/login.html">Login</a></p>
             </div>
         </div>
     </div>
-
+    <script src="signup.js"></script>
 </body>
 
 </html>
