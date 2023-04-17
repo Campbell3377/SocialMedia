@@ -74,8 +74,9 @@ app.post("/users/:id", (req, res) => {
 			console.log(" Error getting mysql_pool connection: " + err)
 			throw err
 		}
+		var password = hash(req.body.password)
 		// const q = "UPDATE users SET `firstName` = ?, `lastName` = ?, `hometown` = ?, `gender` = ?, `password` = ? WHERE uid = ?";
-		const q = `UPDATE users SET \`firstName\` = ${req.body.firstName}, \`lastName\` = ${req.body.lastName}, \`hometown\` = ${req.body.hometown}, \`gender\` = ${req.body.gender}, \`password\` = ${req.body.password} WHERE uid = ${req.params.id};`;
+		const q = `UPDATE users SET \`firstName\` = '${req.body.firstName}', \`lastName\` = '${req.body.lastName}', \`hometown\` = '${req.body.hometown}', \`gender\` = '${req.body.gender}', \`password\` = '${password}' WHERE uid = ${req.params.id};`;
 		const user_id = req.params.id;
 		console.log(q);
 		//const values = [req.body.firstName, req.body.lastName, req.body.hometown, req.body.gender, req.body.password];
