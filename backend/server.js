@@ -56,7 +56,7 @@ app.post("/users", (req, res) => {
 			console.log(" Error getting mysql_pool connection: " + err)
 			throw err
 		}
-		const values = [req.body.firstName, req.body.lastName, req.body.email, req.body.dob, req.body.hometown, req.body.gender, req.body.password]
+		const values = [req.body.firstName, req.body.lastName, req.body.email, req.body.dob, req.body.hometown, req.body.gender, hash(req.body.password)]
 		connection.query("INSERT INTO users (`firstName`, `lastName`, `email`, `dob`, `hometown`, `gender`, `password`) VALUES (?);", [values], function (err, rows) {
 			if (err) return res.json(err)
 			return res.json("User has been created.");
