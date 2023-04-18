@@ -5,22 +5,30 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Albumatic | Home</title>
-    <link rel="stylesheet" href="./home.css" />
+    <title>Alubmatic | For You</title>
+    <link rel="stylesheet" href="./forYou.css">
 </head>
 
-<body onload="homeFeed()">
+<body>
     <nav class="navbar">
-        <a href="./home.html" class="nav-item">Home</a>
+        <a href="../home/home.html" class="nav-item">Home</a>
         <a href="../search/search.html" class="nav-item">Search</a>
         <a href="../leaderboard/leaderboard.html" class="nav-item">Leaderboard</a>
         <a href="../trending/trending.html" class="nav-item">Trending</a>
-        <a href="../forYou/forYou.html" class="nav-item">For You</a>
+        <a href="./forYou.html" class="nav-item">For You</a>
         <a href="../profile/profile.html" class="nav-item">Profile</a>
         <button type="submit" class="logout-btn" onclick="logout()">Logout</button>
     </nav>
-    <div class="post-container" id="post-container"></div>
-    <script src="./home.js"></script>
+
+    <h1 id="for-you">For You Page</h1>
+
+    <h1 id="friend-recommendations">Friend Recommendations</h1>
+
+
+    <h1 id="you-may-also-like">You may also like</h1>
+
+
+    <script src="./forYou.js"></script>
 </body>
 
 </html>
