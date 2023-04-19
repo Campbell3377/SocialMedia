@@ -82,6 +82,7 @@ h1 {
     padding: 30px;
     border-radius: 5px;
     width: 500px;
+    margin-bottom: 20px;
 }
 
 .card h1 {
@@ -144,4 +145,15 @@ select {
 
 .btn:hover {
     background-color: #e62739;
+}
+
+.create-album-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#my-albums-title {
+    margin-top: 20px;
+    margin-bottom: 20px;
 }

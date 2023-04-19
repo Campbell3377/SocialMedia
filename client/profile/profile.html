@@ -15,20 +15,26 @@
         <a href="../search/search.html" class="nav-item">Search</a>
         <a href="../leaderboard/leaderboard.html" class="nav-item">Leaderboard</a>
         <a href="../trending/trending.html" class="nav-item">Trending</a>
+        <a href="../forYou/forYou.html" class="nav-item">For You</a>
         <a href="./profile.html" class="nav-item">Profile</a>
         <button type="submit" class="logout-btn" onclick="logout()">Logout</button>
     </nav>
 
-    <h1>My Albums</h1>
-    <button>Create Album</button>
-    <button>Update Album</button>
-    <button>Delete Album</button>
-    <button>Post Photo</button>
-    <button>Delete Photo</button>
+    <h1 id="my-albums-title">My Albums</h1>
 
-    <h1>Friend Recommendations</h1>
-    <h1>You may also like</h1>
-
+    <div class="create-album-container">
+        <div class="card">
+            <h1>Create Album</h1>
+            <p>Please fill in the field below to name your new album.</p>
+            <form id="create-album-form">
+                <div class="form-group">
+                    <label for="albumName">Album Name</label>
+                    <input type="text" class="form-control" id="albumName" placeholder="Album Name" />
+                </div>
+                <button type="submit" class="btn">Create Album</button>
+            </form>
+        </div>
+    </div>
 
     <div class="update-profile-container">
 

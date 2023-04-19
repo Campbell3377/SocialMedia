@@ -788,9 +788,10 @@ app.get("/recommendedFriends/:id", (req, res) => {
 			throw err;
 		}
 
-		const q = `SELECT f2.friend_id AS recommended_friend, COUNT(*) AS mutual_friends_count
+		const q = `SELECT f2.friend_id AS recommended_friend, COUNT(*) AS mutual_friends_count, u.firstName, u.lastName
 				  FROM friend f1
 				  JOIN friend f2 ON f1.friend_id = f2.uid_friends
+				  JOIN users u ON f2.friend_id = u.uid
 				  WHERE f1.uid_friends = ${req.params.id}
 					AND f2.friend_id NOT IN (
 					  SELECT friend_id
