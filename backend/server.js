@@ -137,6 +137,31 @@ app.get("/feed/:uid", (req, res) => {
 	})
 })
 
+//User Albums
+app.get("/userAlbums/:uid", (req, res) => {
+	console.log("API CALL: /userAlbums -get")
+	var retvalSettingValue = "?"
+	mysql_pool.getConnection(function (err, connection) {
+		if (err) {
+			connection.release()
+			console.log(" Error getting mysql_pool connection: " + err)
+			throw err
+		}
+		const id = req.params.uid;
+		const q = `SELECT a.aid, a.name, a.datePosted
+		FROM album a
+		JOIN users u ON a.owner_id = u.uid
+		WHERE u.uid = ${id}
+		ORDER BY a.datePosted;`
+		connection.query(q, function (err, rows) {
+			if (err) return res.json(err)
+			return res.json(rows);
+		})
+		console.log("mysql_pool.release()")
+		connection.release()
+	})
+})
+
 //albumPhotos
 app.get("/albumPhotos/:aid", (req, res) => {
 	console.log("API CALL: /albumPhotos -get")
@@ -308,7 +333,7 @@ app.post("/albums/name", (req, res) => {
 
 //Delete Album
 app.post("/deleteAlbum/:aid", (req, res) => {
-	console.log("API CALL: /deleteAlbum/{id} -post")
+	console.log("API CALL: /deleteAlbum/{aid} -post")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function (err, connection) {
 		if (err) {
@@ -317,7 +342,7 @@ app.post("/deleteAlbum/:aid", (req, res) => {
 			throw err
 		}
 		const album_id = req.params.aid;
-		const q = `DELETE FROM album WHERE aid = ${req.params.id}`
+		const q = `DELETE FROM album WHERE aid = ${req.params.aid}`
 		connection.query(q, function (err, rows) {
 			if (err) return res.json(err)
 			//return res.json(`Album ${req.params.id} deleted.`);
@@ -378,7 +403,7 @@ app.post("/photos", (req, res) => {
 			throw err
 		}
 		const q = `INSERT INTO photos(\`aid\`, \`caption\`, \`data\`, \`datePosted\`) VALUES (${req.body.aid}, \'${req.body.caption}\', \'${req.body.data}\', \'${req.body.datePosted}\');`
-		//const values = [req.body.album_id, req.body.caption, req.body.data, req.body.datePosted];
+		console.log(q);
 		connection.query(q, function (err, rows) {
 			if (err) return res.json(err)
 			return res.json("Photo has been Posted.");
@@ -421,6 +446,7 @@ app.post("/tags", (req, res) => {
 		}
 		const q = `INSERT INTO tags(\`tag_name\`, \`pid_tags\`) VALUES (\'${req.body.tagName}\', ${req.body.pid});`
 		//const values = [req.body.album_id, req.body.caption, req.body.data, req.body.datePosted];
+		console.log(q);
 		connection.query(q, function (err, rows) {
 			if (err) return res.json(err)
 			return res.json(rows);
@@ -431,7 +457,7 @@ app.post("/tags", (req, res) => {
 });
 
 //Delete Photo
-app.post("/deletephoto/:id", (req, res) => {
+app.post("/deletePhoto/:id", (req, res) => {
 	console.log("API CALL: /deletephoto/{id} -post")
 	var retvalSettingValue = "?"
 	mysql_pool.getConnection(function (err, connection) {
