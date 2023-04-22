@@ -198,9 +198,18 @@ app.post("/usersSearch", (req, res) => {
 			throw err
 		}
 		let str = req.body.search;
-		const q = `SELECT uid, firstName, lastName, email 
-					FROM users 
-					WHERE firstName LIKE \'${str}\' OR lastName LIKE \'${str}\' OR email LIKE \'${str}\';`;
+		let id = req.body.uid;
+		// const q = `SELECT uid, firstName, lastName, email 
+		// 			FROM users 
+		// 			WHERE firstName LIKE \'${str}\' OR lastName LIKE \'${str}\' OR email LIKE \'${str}\';`;
+		const q = `SELECT u.uid, u.firstName, u.lastName, u.email, MAX(f.date_formed) AS date_formed,
+						(CASE WHEN COUNT(CASE WHEN (f.uid_friends = ${id} AND f.friend_id = u.uid) THEN 1 END) > 0 THEN true ELSE false END) AS isFollowing
+				FROM users u
+				LEFT JOIN friend f ON f.friend_id = u.uid AND f.uid_friends = ${id}
+				WHERE u.firstName LIKE '%${str}%' OR u.lastName LIKE '%${str}%' OR u.email LIKE '%${str}%'
+				GROUP BY u.uid, u.firstName, u.lastName, u.email
+				ORDER BY MAX(f.date_formed) DESC;
+				`;
 		connection.query(q, function (err, rows) {
 			if (err) return res.json(err)
 			return res.json(rows);
@@ -220,7 +229,7 @@ app.post("/friends", (req, res) => {
 			console.log(" Error getting mysql_pool connection: " + err)
 			throw err
 		}
-		const q = `INSERT INTO friend (\`uid_friends\`, \`friend_id\`, \`date_formed\`) VALUES (${req.body.uid}, ${req.body.friend_id}, ${req.body.date})`;
+		const q = `INSERT INTO friend (\`uid_friends\`, \`friend_id\`, \`date_formed\`) VALUES (${req.body.uid}, ${req.body.friend_id}, \'${req.body.date}\')`;
 		connection.query(q, function (err, rows) {
 			if (err) return res.json(err)
 			return res.json("Friend Added");
@@ -248,6 +257,7 @@ app.get("/friends/list/:uid", (req, res) => {
 					WHERE (f.uid_friends = ${id} OR f.friend_id = ${id}) AND u.uid != ${id}
 					GROUP BY u.uid, u.firstName, u.lastName, u.email 
 					ORDER BY MAX(f.date_formed) DESC;`;
+		
 		connection.query(q, function (err, rows) {
 			if (err) return res.json(err)
 			return res.json(rows);

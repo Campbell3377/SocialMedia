@@ -122,6 +122,96 @@ async function deleteAlbum(aid) {
     }
 }
 
+async function addFriend(friend_id) {
+    const dateAdded = new Date().toISOString().slice(0, 10)
+    const uid = localStorage.getItem('uid')
+    try {
+        const response = await fetch(`http://localhost:5501/friends`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                uid:uid, friend_id: friend_id, date: dateAdded
+            }),
+        })
+
+        if (response.ok) {
+            const data = await response.json()
+            console.log('Friend Added: ', data)
+            return data
+        }
+        else {
+            console.error('There was an error adding friend')
+            throw new Error('There was an error adding friend')
+        }
+
+    } catch (error) {
+        console.error('Error in addFriend', error)
+        throw error
+    }
+}
+
+async function myFriends() {
+    document.getElementById('friends-container').innerHTML = ''
+    var uid = localStorage.getItem('uid');
+    let url = `http://localhost:5501/friends/list/${uid}`;
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.status === 200) {
+            const data = await response.json();
+
+            if (data.length == 0) {
+                console.log('You have no friends');
+            }
+
+            for (let friend of data) {
+                let friendDiv = document.createElement('div');
+                friendDiv.className = 'friend';
+
+                let friendHeader = document.createElement('div');
+                friendHeader.className = 'friend-header';
+
+                let friendName = document.createElement('h2');
+                friendName.className = 'friend-name';
+                friendName.innerHTML = `${friend.firstName} ${friend.lastName}`;
+
+
+                let followBackButton = document.createElement('button');   //We don't need this button, but I'm leaving it here in case we want to add it back in
+                // followBackButton.classList.add = 'btn btn-primary';
+                followBackButton.innerHTML = 'Follow Back';
+                followBackButton.addEventListener('click', async () => {
+                    await addFriend(friend.uid);
+                    myFriends();
+                });
+
+                if (friend.isFollowing) {
+                    followBackButton.disabled = true;
+                    followBackButton.innerHTML = 'Following';
+                    followBackButton.classList.add = 'followed';
+                }
+
+                //friendButtons.appendChild(deleteFriendButton);
+
+                friendHeader.appendChild(friendName);
+                
+                friendDiv.appendChild(friendHeader);
+                friendDiv.appendChild(followBackButton);
+                document.getElementById('friends-container').appendChild(friendDiv);
+            }
+        }
+    } catch (error) {
+        console.error('Error in myFriends', error);
+        throw error;
+    }
+}
+
 async function myAlbums() {
     document.getElementById('albums-container').innerHTML = ''
     var uid = localStorage.getItem('uid');
