@@ -17,9 +17,41 @@ tagSelect.addEventListener('change', () => {
     searchReturn.innerHTML = ''
 })
 
+async function addFriend(friend_id) {
+    const dateAdded = new Date().toISOString().slice(0, 10)
+    const uid = localStorage.getItem('uid')
+    console.log('fid: ', friend_id)
+    try {
+        const response = await fetch(`http://localhost:5501/friends`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                uid:uid, friend_id: friend_id, date: dateAdded
+            }),
+        })
+
+        if (response.ok) {
+            const data = await response.json()
+            console.log('Friend Added: ', data)
+            return data
+        }
+        else {
+            console.error('There was an error adding friend')
+            throw new Error('There was an error adding friend')
+        }
+
+    } catch (error) {
+        console.error('Error in addFriend', error)
+        throw error
+    }
+}
+
 searchButton.addEventListener('click', async () => {
     const search = searchInput.value
     const searchDropdownInput = searchSelect.value
+    const uid = localStorage.getItem('uid')
 
     if (search == '') {
         alert('Please fill in the search field.')
@@ -32,7 +64,7 @@ searchButton.addEventListener('click', async () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ search })
+                body: JSON.stringify({ search, uid })
             });
 
             if (response.status === 200) {
@@ -52,8 +84,25 @@ searchButton.addEventListener('click', async () => {
                     emailP.classList.add('email')
                     emailP.textContent = result.email
 
+                    const followBackButton = document.createElement('button') 
+                    // followBackButton.classList.add = 'btn btn-primary';
+                    followBackButton.innerHTML = 'Follow'
+                    followBackButton.addEventListener('click', async () => {
+                        await addFriend(result.uid)
+                        followBackButton.disabled = true;
+                        followBackButton.innerHTML = 'Following';
+                        //myFriends()
+                    })
+
+                    if (result.isFollowing) {
+                        followBackButton.disabled = true;
+                        followBackButton.innerHTML = 'Following';
+                        //followBackButton.classList.add = 'followed';
+                    }
+
                     resultCardDiv.appendChild(nameH3)
                     resultCardDiv.appendChild(emailP)
+                    resultCardDiv.appendChild(followBackButton)
 
                     searchReturn.appendChild(resultCardDiv)
                 })
