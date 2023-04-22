@@ -232,10 +232,11 @@ select {
 /* Copied From home css */
 .post-container {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     margin: 2rem 0;
+    /* width: 500px; */
 }
     
 .post {

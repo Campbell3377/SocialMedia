@@ -186,6 +186,8 @@ async function myAlbums() {
                 albumHeader.appendChild(albumButtons);
                 albumDiv.appendChild(albumHeader);
 
+                const postContainerWrapper = document.createElement('div');
+                postContainerWrapper.classList.add('post-container');
 
                 let url = `http://localhost:5501/albumPhotos/${aid}`;
                 try {
@@ -285,7 +287,7 @@ async function myAlbums() {
                                     }
                                 })
                                 .then((tagData) => {
-                                    if (tagData.length == 0) {
+                                    if (tagData.length == -1) {
                                         console.log('No Tags.');
                                     } else {
                                         const tagContainer = document.createElement('div');
@@ -372,8 +374,10 @@ async function myAlbums() {
                                 });
                                 
                                 postContainer.appendChild(deleteButton);
+                                postContainerWrapper.appendChild(postContainer);
+                                albumDiv.appendChild(postContainerWrapper);
+                                //albumDiv.appendChild(postContainer); 
 
-                                albumDiv.appendChild(postContainer); 
                         }
 
                     } else {

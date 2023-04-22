@@ -20,7 +20,7 @@ async function homeFeed() {
 
             for (let post of data) {
                 const pid = post.pid.toString();
-                console.log(pid);
+                //console.log(pid);
                 const aid = post.aid;
                 const postContainer = document.createElement('div');
                 postContainer.classList.add('post');
