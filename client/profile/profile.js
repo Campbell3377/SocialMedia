@@ -3,7 +3,7 @@ document.getElementById('update-profile-form').addEventListener('submit', (event
     updateInfo()
 })
 document.getElementById('create-album-form').addEventListener('submit', (event) => {
-    //event.preventDefault()
+    event.preventDefault()
     addAlbum()
 })
 async function tagPhoto(pid, text) {
@@ -132,7 +132,7 @@ async function addFriend(friend_id) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                uid:uid, friend_id: friend_id, date: dateAdded
+                uid: uid, friend_id: friend_id, date: dateAdded
             }),
         })
 
@@ -200,7 +200,7 @@ async function myFriends() {
                 //friendButtons.appendChild(deleteFriendButton);
 
                 friendHeader.appendChild(friendName);
-                
+
                 friendDiv.appendChild(friendHeader);
                 friendDiv.appendChild(followBackButton);
                 document.getElementById('friends-container').appendChild(friendDiv);
@@ -229,7 +229,7 @@ async function myAlbums() {
             const data = await response.json();
 
             if (data.length == 0) {
-                console.log('Something went wrong: Photos');
+                // console.log('Something went wrong: Photos');
             }
 
             for (let album of data) {
@@ -287,12 +287,12 @@ async function myAlbums() {
                             'Content-Type': 'application/json',
                         },
                     });
-            
+
                     if (response.status === 200) {
                         const data = await response.json();
-            
+
                         if (data.length == 0) {
-                            console.log('Something went wrong: Photos');
+                            // console.log('Something went wrong: Photos');
                         }
                         for (let post of data) {
                             const pid = post.pid.toString();
@@ -316,7 +316,7 @@ async function myAlbums() {
                             // header.appendChild(albumName);
                             // header.appendChild(deleteButton);
                             // postContainer.appendChild(header);
-                            
+
 
                             //postContainer.appendChild(deleteButton);
 
@@ -339,7 +339,7 @@ async function myAlbums() {
                             const captionEdit = document.createElement('button');
                             captionEdit.classList.add('edit-btn');
                             captionEdit.textContent = 'Edit Caption';
-                            captionEdit.addEventListener('click', async () => {   
+                            captionEdit.addEventListener('click', async () => {
                                 //Edit Caption
                                 const text = prompt('New Caption:')
                                 try {
@@ -349,10 +349,10 @@ async function myAlbums() {
                                     else {
                                         text.trim()
                                         await editCaption(pid, text)
-            
+
                                         myAlbums()
                                     }
-            
+
                                 } catch (error) {
                                     console.error('Error:', error)
                                 }
@@ -387,9 +387,9 @@ async function myAlbums() {
                                             t.classList.add('tag');
                                             t.textContent = tag.tag_name;
                                             tagContainer.appendChild(t);
-                                            
+
                                         });
-                                        if (tagData.length < 5){
+                                        if (tagData.length < 5) {
                                             const addTag = document.createElement('button');
                                             addTag.classList.add('tag');
                                             addTag.textContent = '+';
@@ -402,10 +402,10 @@ async function myAlbums() {
                                                     else {
                                                         text.trim()
                                                         await tagPhoto(pid, text)
-                            
+
                                                         myAlbums()
                                                     }
-                            
+
                                                 } catch (error) {
                                                     console.error('Error:', error)
                                                 }
@@ -451,22 +451,22 @@ async function myAlbums() {
                                     //alert('An error occurred. Please try again.');
                                 });
 
-                                const separation = document.createElement('div')
-                                separation.classList.add('separation')
-                                postContainer.appendChild(separation)
-                            
-                                const deleteButton = document.createElement('button');
-                                deleteButton.classList.add('delete-button');
-                                deleteButton.innerHTML = 'Delete';
-                                deleteButton.addEventListener('click', async () => {
-                                    await deletePhoto(pid);
-                                    myAlbums();
-                                });
-                                
-                                postContainer.appendChild(deleteButton);
-                                postContainerWrapper.appendChild(postContainer);
-                                albumDiv.appendChild(postContainerWrapper);
-                                //albumDiv.appendChild(postContainer); 
+                            const separation = document.createElement('div')
+                            separation.classList.add('separation')
+                            postContainer.appendChild(separation)
+
+                            const deleteButton = document.createElement('button');
+                            deleteButton.classList.add('delete-button');
+                            deleteButton.innerHTML = 'Delete';
+                            deleteButton.addEventListener('click', async () => {
+                                await deletePhoto(pid);
+                                myAlbums();
+                            });
+
+                            postContainer.appendChild(deleteButton);
+                            postContainerWrapper.appendChild(postContainer);
+                            albumDiv.appendChild(postContainerWrapper);
+                            //albumDiv.appendChild(postContainer); 
 
                         }
 
@@ -497,6 +497,7 @@ async function myAlbums() {
 
 async function addAlbum() {
     const uid = localStorage.getItem('uid');
+    console.log(uid)
     const albumName = document.getElementById('albumName').value;
     const datePosted = new Date().toISOString().slice(0, 10);
     if (albumName == '') {
@@ -516,9 +517,10 @@ async function addAlbum() {
                     datePosted: datePosted
                 })
             })
-            if (response.status === 200) {
+            if (response.ok) {
                 //alert('Album successfully created.')
                 myAlbums()
+                document.getElementById('create-album-form').reset()
             } else {
                 const error = await response.text();
                 console.error('Bad Response', error);
