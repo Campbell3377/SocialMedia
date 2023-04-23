@@ -42,7 +42,6 @@ async function signup() {
             if (response.ok) {
                 const data = await response.json()
                 console.log('Account created: ', data)
-                // return data
 
                 alert('Thank you for creating an account. You will be redirected to login.')
                 window.location.href = '../login/login.html'

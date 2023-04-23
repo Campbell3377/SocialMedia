@@ -28,7 +28,7 @@ async function addFriend(friend_id) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                uid:uid, friend_id: friend_id, date: dateAdded
+                uid: uid, friend_id: friend_id, date: dateAdded
             }),
         })
 
@@ -84,20 +84,17 @@ searchButton.addEventListener('click', async () => {
                     emailP.classList.add('email')
                     emailP.textContent = result.email
 
-                    const followBackButton = document.createElement('button') 
-                    // followBackButton.classList.add = 'btn btn-primary';
+                    const followBackButton = document.createElement('button')
                     followBackButton.innerHTML = 'Follow'
                     followBackButton.addEventListener('click', async () => {
                         await addFriend(result.uid)
                         followBackButton.disabled = true;
                         followBackButton.innerHTML = 'Following';
-                        //myFriends()
                     })
 
                     if (result.isFollowing) {
                         followBackButton.disabled = true;
                         followBackButton.innerHTML = 'Following';
-                        //followBackButton.classList.add = 'followed';
                     }
 
                     resultCardDiv.appendChild(nameH3)
@@ -200,7 +197,6 @@ searchButton.addEventListener('click', async () => {
                         albumName.textContent = post.albumName;
                         albumName.addEventListener('click', () => {
                             localStorage.setItem('aid', aid);
-                            // Go to album view
                         });
                         resultCard.appendChild(albumName);
 
@@ -240,7 +236,6 @@ searchButton.addEventListener('click', async () => {
                                     tagData.forEach((tag) => {
                                         const t = document.createElement('div');
                                         t.classList.add('tag');
-                                        // t.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                                         t.textContent = tag.tag_name;
                                         tagContainer.appendChild(t);
                                         resultCard.appendChild(tagContainer);
@@ -249,7 +244,6 @@ searchButton.addEventListener('click', async () => {
                             })
                             .catch((error) => {
                                 console.error(error);
-                                //alert('An error occurred. Please try again.');
                             });
 
                         const likesUrl = `http://localhost:5501/likes/${pid}`;
@@ -303,7 +297,7 @@ searchButton.addEventListener('click', async () => {
                             })
                             .then((commentData) => {
                                 if (commentData.length == 0) {
-                                    console.log('No Comments.');        //Maybe Add Some UI elements to this if and else for adding a comment
+                                    console.log('No Comments.');
                                 } else {
                                     const commentContainer = document.createElement('div');
                                     commentContainer.classList.add('comment-container');
@@ -363,7 +357,6 @@ searchButton.addEventListener('click', async () => {
                         albumName.textContent = post.albumName;
                         albumName.addEventListener('click', () => {
                             localStorage.setItem('aid', aid);
-                            // Go to album view
                         });
                         resultCard.appendChild(albumName);
 
@@ -403,7 +396,6 @@ searchButton.addEventListener('click', async () => {
                                     tagData.forEach((tag) => {
                                         const t = document.createElement('div');
                                         t.classList.add('tag');
-                                        // t.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                                         t.textContent = tag.tag_name;
                                         tagContainer.appendChild(t);
                                         resultCard.appendChild(tagContainer);
@@ -412,7 +404,6 @@ searchButton.addEventListener('click', async () => {
                             })
                             .catch((error) => {
                                 console.error(error);
-                                //alert('An error occurred. Please try again.');
                             });
 
                         const likesUrl = `http://localhost:5501/likes/${pid}`;
@@ -466,7 +457,7 @@ searchButton.addEventListener('click', async () => {
                             })
                             .then((commentData) => {
                                 if (commentData.length == 0) {
-                                    console.log('No Comments.');        //Maybe Add Some UI elements to this if and else for adding a comment
+                                    console.log('No Comments.');
                                 } else {
                                     const commentContainer = document.createElement('div');
                                     commentContainer.classList.add('comment-container');

@@ -1,7 +1,6 @@
 async function homeFeed() {
     document.getElementById('post-container').innerHTML = ''
     var uid = localStorage.getItem('uid');
-    // if (uid != 1) uid = 2;
     let url = `http://localhost:5501/feed/${uid}`;
     try {
         const response = await fetch(url, {
@@ -20,7 +19,6 @@ async function homeFeed() {
 
             for (let post of data) {
                 const pid = post.pid.toString();
-                //console.log(pid);
                 const aid = post.aid;
                 const postContainer = document.createElement('div');
                 postContainer.classList.add('post');
@@ -31,7 +29,6 @@ async function homeFeed() {
                 albumName.textContent = post.albumName;
                 albumName.addEventListener('click', () => {
                     localStorage.setItem('aid', aid);
-                    // Go to album view
                 });
                 postContainer.appendChild(albumName);
 
@@ -86,7 +83,6 @@ async function homeFeed() {
                     })
                     .catch((error) => {
                         console.error(error);
-                        //alert('An error occurred. Please try again.');
                     });
 
                 const likesUrl = `http://localhost:5501/likes/${pid}`;
@@ -117,7 +113,6 @@ async function homeFeed() {
                     })
                     .catch((error) => {
                         console.error(error);
-                        //alert('An error occurred. Please try again.');
                     });
 
                 const buttonContainer = document.createElement('div');
@@ -181,7 +176,7 @@ async function homeFeed() {
                     })
                     .then((commentData) => {
                         if (commentData.length == 0) {
-                            console.log('No Comments.');        //Maybe Add Some UI elements to this if and else for adding a comment
+                            console.log('No Comments.');
                         } else {
                             const commentContainer = document.createElement('div');
                             commentContainer.classList.add('comment-container');
@@ -200,20 +195,16 @@ async function homeFeed() {
                     })
                     .catch((error) => {
                         console.error(error);
-                        //alert('An error occurred. Please try again.');
                     });
                 document.getElementById('post-container').appendChild(postContainer);
-                // document.body.appendChild(postContainer);
             }
         } else {
             const error = await response.text();
             console.error('Bad Response Getting Feed', error);
-            //alert('Error logging in. Please try again. 5');
         }
     } catch (error) {
 
         console.error('Error while sendingrequest: Feed', error);
-        //alert('An error occurred. Please try again. 6');
     }
 
 }
