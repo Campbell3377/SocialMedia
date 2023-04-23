@@ -76,6 +76,11 @@ body {
 	text-decoration: underline;
 }
 
+.posted-by {
+	margin: 1rem;
+	font-weight: bold;
+}
+
 .image-container {
 	margin-bottom: 1.5rem;
 	max-width: 100%;

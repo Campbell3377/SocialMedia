@@ -35,6 +35,11 @@ async function homeFeed() {
                 });
                 postContainer.appendChild(albumName);
 
+                const postedBy = document.createElement('span')
+                postedBy.textContent = `${post.firstName} ${post.lastName}`
+                postedBy.classList.add('posted-by')
+                postContainer.appendChild(postedBy)
+
                 // Set the image
                 const imageContainer = document.createElement('div');
                 imageContainer.classList.add('image-container');
