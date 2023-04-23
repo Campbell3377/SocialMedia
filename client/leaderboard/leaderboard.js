@@ -23,9 +23,11 @@ function populateLeaderboardTable(data) {
     else postsTd.textContent = row.pscore;
     if (row.cscore == null) commentsTd.textContent = 0
     else commentsTd.textContent = row.cscore;
-
-    if (row.uid === current_uid) {
-      highlightCurrentUserRow(tr);
+    //console.log(current_uid, row.uid)
+    if (row.uid == current_uid) {
+      //highlightCurrentUserRow(tr);
+      //console.log('hello')
+      tr.classList.add('highlight');
     }
 
     tr.appendChild(rankTd);

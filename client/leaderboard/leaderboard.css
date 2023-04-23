@@ -88,7 +88,7 @@ tbody td:first-child {
   font-weight: bold;
 }
 
-.highlight {
+tbody .highlight {
   background-color: #ff4b5c;
   color: #ffffff;
 }
