@@ -10,7 +10,7 @@ var PORT = 5501
 
 const mysql_pool = mysql.createPool({
 	connectionLimit: 100,
-	host: "10.20.253.2",
+	host: "192.168.1.211",
 	user: "root",
 	password: "Password23644.",
 	database: "social"
